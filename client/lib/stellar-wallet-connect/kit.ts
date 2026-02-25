@@ -41,22 +41,15 @@ export function initializeWalletKit(network: StellarNetwork = 'testnet'): void {
   if (!isInitialized) {
     try {
       configuredNetwork = network;
-      console.log('[v0] Initializing StellarWalletsKit with network:', network);
+      const passphrase = networkPassphraseMap[network];
       
       StellarWalletsKit.init({
         modules: defaultModules(),
-        network: networkPassphraseMap[network],
+        network: passphrase,
       });
       
       isInitialized = true;
       initializationError = null;
-      
-      // [v0] Log available wallets after initialization
-      StellarWalletsKit.getAvailableWallets().then((wallets) => {
-        console.log('[v0] StellarWalletsKit initialized. Available wallets:', wallets);
-      }).catch((err) => {
-        console.log('[v0] Could not fetch available wallets:', err);
-      });
     } catch (error) {
       const message =
         error instanceof Error
@@ -101,29 +94,6 @@ export function getKit() {
     initializeWalletKit();
   }
   return StellarWalletsKit;
-}
-
-/**
- * Detect installed wallets and return their info.
- * Useful for checking if Freighter or other wallets are available.
- */
-export async function getAvailableWallets() {
-  if (typeof window === 'undefined') {
-    throw new Error('getAvailableWallets can only be called on the client side');
-  }
-
-  if (!isInitialized) {
-    initializeWalletKit();
-  }
-
-  try {
-    const wallets = await StellarWalletsKit.getAvailableWallets();
-    console.log('[v0] Available wallets:', wallets);
-    return wallets;
-  } catch (error) {
-    console.error('[v0] Error fetching available wallets:', error);
-    return [];
-  }
 }
 
 /**

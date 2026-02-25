@@ -81,15 +81,20 @@ export function useWallet(network?: StellarNetwork): UseWalletReturn {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    initializeWalletKit(network);
+    try {
+      initializeWalletKit(network);
+      console.log("[v0] useWallet: StellarWalletsKit initialized");
+    } catch (error) {
+      console.error("[v0] useWallet: Failed to initialize kit:", error);
+    }
 
     const unsubscribeState = StellarWalletsKit.on(
       KitEventType.STATE_UPDATED,
-      (event) => {
-        const { address, networkPassphrase } = event.payload;
+      (event: any) => {
+        const { address, networkPassphrase } = event?.payload || {};
 
         if (address) {
-          const net: StellarNetwork = networkPassphrase.includes('TESTNET')
+          const net: StellarNetwork = networkPassphrase?.includes?.('TESTNET')
             ? 'testnet'
             : 'mainnet';
           connectWalletStore(address, net, 'Connected Wallet', address);
@@ -104,6 +109,7 @@ export function useWallet(network?: StellarNetwork): UseWalletReturn {
     const unsubscribeDisconnect = StellarWalletsKit.on(
       KitEventType.DISCONNECT,
       () => {
+        console.log("[v0] useWallet: DISCONNECT event received");
         disconnectWalletStore();
         updateConnectionStatus(false);
       }
@@ -112,17 +118,20 @@ export function useWallet(network?: StellarNetwork): UseWalletReturn {
     // Check for an existing session on mount.
     const checkExistingConnection = async () => {
       try {
-        const { address } = await StellarWalletsKit.getAddress();
+        const address = await StellarWalletsKit.getAddress();
+        
         if (address) {
+          // Use the override network parameter if provided, otherwise default to testnet
+          const detectedNetwork: StellarNetwork = network || 'testnet';
           connectWalletStore(
             address,
-            network ?? 'testnet',
+            detectedNetwork,
             'Connected Wallet',
             address
           );
           updateConnectionStatus(true);
         }
-      } catch {
+      } catch (error) {
         // No active connection -- that's fine.
       }
     };
@@ -159,15 +168,9 @@ export function useWallet(network?: StellarNetwork): UseWalletReturn {
         );
       }
 
-      // Check for available wallets before opening modal
-      const wallets = await StellarWalletsKit.getAvailableWallets();
-      console.log('[v0] Available wallets detected:', wallets.map(w => w.name));
-
       document.body.classList.add('stellar-wallets-kit-modal-open');
 
       try {
-        // authModal() will auto-connect if only one wallet is available
-        // or show a modal for the user to select from multiple wallets
         await StellarWalletsKit.authModal();
       } finally {
         setTimeout(() => {

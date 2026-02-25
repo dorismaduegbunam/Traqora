@@ -41,7 +41,6 @@ export {
   getConfiguredNetwork,
   getKit,
   signTransaction,
-  getAvailableWallets,
 } from './kit';
 
 // ---- React Hook ----
