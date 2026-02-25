@@ -23,6 +23,11 @@ const networkEnumMap: Record<StellarNetwork, Networks> = {
   mainnet: Networks.PUBLIC,
 };
 
+const networkPassphraseMap: Record<StellarNetwork, string> = {
+  testnet: 'Test SDF Network ; September 2015',
+  mainnet: 'Public Global Stellar Network ; September 2015',
+};
+
 // ---------------------------------------------------------------------------
 // Public helpers
 // ---------------------------------------------------------------------------
