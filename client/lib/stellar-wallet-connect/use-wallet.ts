@@ -159,9 +159,15 @@ export function useWallet(network?: StellarNetwork): UseWalletReturn {
         );
       }
 
+      // Check for available wallets before opening modal
+      const wallets = await StellarWalletsKit.getAvailableWallets();
+      console.log('[v0] Available wallets detected:', wallets.map(w => w.name));
+
       document.body.classList.add('stellar-wallets-kit-modal-open');
 
       try {
+        // authModal() will auto-connect if only one wallet is available
+        // or show a modal for the user to select from multiple wallets
         await StellarWalletsKit.authModal();
       } finally {
         setTimeout(() => {
