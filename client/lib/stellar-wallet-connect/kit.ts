@@ -18,7 +18,7 @@ let isInitialized = false;
 let initializationError: Error | null = null;
 let configuredNetwork: StellarNetwork = 'testnet';
 
-const networkPassphraseMap: Record<StellarNetwork, string> = {
+const networkEnumMap: Record<StellarNetwork, Networks> = {
   testnet: Networks.TESTNET,
   mainnet: Networks.PUBLIC,
 };
@@ -41,11 +41,10 @@ export function initializeWalletKit(network: StellarNetwork = 'testnet'): void {
   if (!isInitialized) {
     try {
       configuredNetwork = network;
-      const passphrase = networkPassphraseMap[network];
       
       StellarWalletsKit.init({
         modules: defaultModules(),
-        network: passphrase,
+        network: networkEnumMap[network],
       });
       
       isInitialized = true;

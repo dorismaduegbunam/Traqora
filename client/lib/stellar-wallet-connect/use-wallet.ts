@@ -118,7 +118,8 @@ export function useWallet(network?: StellarNetwork): UseWalletReturn {
     // Check for an existing session on mount.
     const checkExistingConnection = async () => {
       try {
-        const address = await StellarWalletsKit.getAddress();
+        const result = await StellarWalletsKit.getAddress();
+        const address = result?.address;
         
         if (address) {
           // Use the override network parameter if provided, otherwise default to testnet
